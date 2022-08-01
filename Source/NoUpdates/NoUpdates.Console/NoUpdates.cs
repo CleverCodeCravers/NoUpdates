@@ -1,4 +1,5 @@
-﻿using System.ServiceProcess;
+﻿using System.Management;
+using System.ServiceProcess;
 
 
 Console.WriteLine("---------------------------------------------------------------------");
@@ -10,11 +11,7 @@ Console.WriteLine("");
 Console.WriteLine("---------------------------------------------------------------------");
 Console.WriteLine("");
 
-Console.Write("Please specify a timeout in minutes (default is 10 Minutes): ");
-var userTimeout = Console.ReadLine();
 Console.WriteLine("");
-
-if (userTimeout == "") Console.WriteLine("Defaulting the Timeout to 10 Minutes!");
 
 
 void DisableUpdates()
@@ -27,6 +24,11 @@ void DisableUpdates()
     {
         if (scTemp.ServiceName.Equals("wuauserv"))
         {
+            using (var m = new ManagementObject(string.Format("Win32_Service.Name=\"{0}\"", scTemp.ServiceName)))
+            {
+                m.InvokeMethod("ChangeStartMode", new object[] { "Disabled" });
+            }
+
             Console.WriteLine("[" + String.Format("{0:g}", start) + "]" +  " The Windows Update service status is currently set to {0}",
                   scTemp.Status.ToString());
 
@@ -58,14 +60,7 @@ void DisableUpdates()
 while (true)
 {
     DisableUpdates();
-    if (userTimeout != "")
-    {
-        Thread.Sleep(60 * 1000 * int.Parse(userTimeout));
-    }
-    else
-    {
-        Thread.Sleep(60 * 1000 * 10);
-    }
+    Thread.Sleep(60 * 1000 * 10);
     Console.WriteLine("");
     Console.WriteLine("---------------------------------------------------------------------");
     Console.WriteLine("");
