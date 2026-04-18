@@ -15,6 +15,8 @@ jobs:
   build:
     name: build-${{matrix.os}}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         os: [windows-latest]
@@ -51,6 +53,7 @@ jobs:
           dest: ${{ env.SOLUTION_DIR }}/${{matrix.OUTPUTDIR}}.zip
 
       - name: Create Github Release
+        if: github.event_name != 'pull_request' && github.actor != 'dependabot[bot]'
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
